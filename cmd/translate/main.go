@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fatih/color"
+	"github.com/gernest/wow"
+	"github.com/gernest/wow/spin"
 	flag "github.com/ogier/pflag"
 )
 
@@ -15,11 +18,22 @@ var (
 func main() {
 	flag.Parse()
 
+	availableTargetLangs := [][]string{{"ru", "Russian"},
+		{"es", "Spanish"},
+		{"fr", "French"},
+		{"de", "German"},
+		{"zh", "Chinese"},
+		{"ja", "Japanese"}}
+
 	// if user does not supply flags, print usage
 	if flag.NFlag() == 0 {
-		fmt.Printf("Usage: %s [options]\n", os.Args[0])
-		fmt.Println("Options:")
+		color.Green("Usage: %s [options]\n", os.Args[0])
+		color.Blue("Options:")
 		flag.PrintDefaults()
+		color.Blue("Available target languages:")
+		for i := 0; i < len(availableTargetLangs); i++ {
+			fmt.Printf("%s: %s\n", availableTargetLangs[i][0], availableTargetLangs[i][1])
+		}
 		os.Exit(1)
 	}
 
@@ -28,11 +42,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Translating {%s} to: %s\n", sourceText, targetLang)
+	message := fmt.Sprintf("Translating {%s} to: %s\n", sourceText, targetLang)
+
+	color.Blue(message)
+
+	w := wow.New(os.Stdout, spin.Get(spin.Dots), "")
+	w.Start()
 
 	translated := GetTranslation(sourceText, targetLang)
 
-	fmt.Println(translated)
+	w.PersistWith(spin.Spinner{Frames: []string{"👍"}}, " "+translated)
 }
 
 func init() {
